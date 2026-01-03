@@ -9,7 +9,10 @@ const methodOverride=require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError=require("./utils/ExpressError.js");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
+let MongoStore = require("connect-mongo");
+if (MongoStore.default) {
+    MongoStore = MongoStore.default;
+}
 
 const flash = require("connect-flash");
 const passport = require("passport");
@@ -43,7 +46,7 @@ app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
-const store = new MongoStore({
+const store = MongoStore.create({
     mongoUrl: dbUrl,
     crypto: {
         secret: process.env.SECRET,
