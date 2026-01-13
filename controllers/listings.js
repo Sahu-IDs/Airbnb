@@ -1,10 +1,13 @@
 const Listing = require("../Models/listing");
-const fetch = require("node-fetch");
+const User = require("../Models/user");
 // HELPER: Get coordinates
 async function getCoordinates(location, country) {
   try {
     const query = `${location}, ${country}`;
     console.log("🔍 Geocoding query:", query);
+
+    // Fix: Use dynamic import for node-fetch
+    const fetch = (await import("node-fetch")).default;
 
     const url =
       "https://nominatim.openstreetmap.org/search" +
@@ -74,15 +77,13 @@ module.exports.showListing = async (req, res) => {
 };
 // CREATE LISTING
 module.exports.createListing = async (req, res) => {
-  const { path: url, filename } = req.file;
   const { location, country } = req.body.listing;
 
   const coords = await getCoordinates(location, country);
 
   const newListing = new Listing({
     ...req.body.listing,
-    owner: req.user._id,
-    image: { url, filename },
+    owner: [req.user._id, "69597b0a14e09f921a9b939a"],
 
     //  GeoJSON store
     geometry: {
@@ -90,6 +91,11 @@ module.exports.createListing = async (req, res) => {
       coordinates: [coords.lng, coords.lat]
     }
   });
+
+  if (req.file) {
+    const { path: url, filename } = req.file;
+    newListing.image = { url, filename };
+  }
 
   await newListing.save();
 

@@ -16,21 +16,23 @@ const listingSchema = new Schema({
     type: {
       type: String,
       enum: ['Point'],
-      required: true
     },
     coordinates: {
       type: [Number],
-      required: true
     }
   },
   reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
-  owner: { type: Schema.Types.ObjectId, ref: "User" },
+  owner: [{ type: Schema.Types.ObjectId, ref: "User" }],
   category: {
     type: String,
     enum: [
       "trending","rooms","iconic","mountain","castle",
       "pool","camping","farm","arctic","domes","boats"
     ]
+  },
+  amenities: {
+    type: [String],
+    default: []
   },
   views: { type: Number, default: 0 }
 });

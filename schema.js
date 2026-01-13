@@ -28,6 +28,7 @@ module.exports.listingSchema = Joi.object({
       "domes",
       "boats"
     ).required(),
+    amenities: Joi.array().items(Joi.string()).optional(),
 
     // 🔥 GEOJSON — optional
     geometry: Joi.object({

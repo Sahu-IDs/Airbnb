@@ -1,5 +1,4 @@
 <% layout('/layouts/boilerplate') %> 
-<body>
     <style> 
     #filters{
       display:flex;
@@ -23,7 +22,7 @@
       display: none;
     }
     .tax-toggle {
-      display: 1px solid black;
+      border: 1px solid black;
       border-radius: 1rem;
       height: 3.25rem;
       padding:1rem;
@@ -119,7 +118,7 @@
     <b> <%= listing.title %> </b>
     <br>
     &#8377;<%= (listing.price || 0).toLocaleString("en-IN") %> /Night
-    <i class="tax-info"> &nbsp; &nbsp;+18% GST</i>
+    <span class="tax-info"> &nbsp; &nbsp;+18% GST</span>
     </p>
   </div>
 </div>
@@ -130,7 +129,7 @@
   let taxSwitch = document.getElementById("switchCheckDefault")
  taxSwitch.addEventListener("click",() =>{
   let taxInfo =document.getElementsByClassName("tax-info");
-  for(info of taxInfo) {
+  for(let info of taxInfo) {
     if (info.style.display != "inline") {
       info.style.display ="inline";
     } else {
@@ -140,4 +139,3 @@
   }
  });
 </script>
-

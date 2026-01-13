@@ -2,29 +2,32 @@
 <body>
    <div class="row">
    <div class="col-8 offset-3">
-    <h3><%= listing.title %> </h3>
+    <div class="d-flex justify-content-between align-items-center">
+      <h3><%= listing.title %> </h3>
+      <button id="shareBtn" class="btn btn-outline-danger" style="border-radius: 20px;">Share <i class="fa-solid fa-share"></i></button>
+    </div>
     </div>
     <div class="card col-6 offset-3 show-card listing-card">
-      <img src="<%= listing.image %>" class="card-img-top show-img" alt="listing image">
+      <img src="<%= listing.image.url || listing.image %>" class="card-img-top show-img" alt="listing image">
   <div class="card-body">
-    <p class="card-text">owned by<i><%= listing.owner.username %></i></p>
+    <p class="card-text">owned by <i><%= listing.owner.map(o => o.username).join(', ') %></i></p>
     <p class="card-text"><%= listing.description %> </p>
-      <p class="card-text">&#8377;<%= listing.price.toLocaleString("en-IN") %> </p>
+      <p class="card-text">&#8377;<%= listing.price ? listing.price.toLocaleString("en-IN") : "" %> </p>
       <p class="card-text"><%= listing.location %> </p>
      <p class="card-text"> <%= listing.country %> </p>
   </div>
  </div>
     <br/>
-    <% if(currUser && listing.owner._id.equals(currUser._id)) { %>
+    <% if(currUser && listing.owner && listing.owner.some(owner => owner.equals(currUser._id))) { %>
     <div class="btns">
     <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-3 edit-btn">Edit</a>
  <form method="POST" action="/listings/<%=listing._id%>?_method=DELETE">
     <button class="btn btn-dark offset-5">Delete</button>
  </form>
   </div>
-  <div class="col-8 offset-3 mb-3">
-   <br/>
    <% } %>
+   
+   <div class="col-8 offset-3 mb-3">
    <% if(currUser)  { %>
    <h4>Leave a Review</h4>
    <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">  
@@ -51,42 +54,57 @@
    </div>
    <button class="btn btn-outline-dark">Submit</button>
    </form>
+   <hr/>
    <% } %>
-   <br/>
-   <p><b>All Reviews</b><p>
-    <div class="row"> 
+   
+   <% if(listing.reviews && listing.reviews.length > 0) { %>
+   <div class="row">
+   <p><b>All Reviews</b></p>
    <% for(review of listing.reviews) { %>
     <div class="card col-5 ms-3 mb-3">
    <div class="card-body">
-    <h5 class="card-title"> @ <%= review.author.username %> </h5>
+    <h5 class="card-title"> @ <%= review.author ? review.author.username : "Anonymous" %> </h5>
     <p class="starability-result card-text" data-rating= "<%= review.rating %>" ></p>
     <p class="card-text"><%= review.comment %></p>
     </div>  
+    <% if(currUser && review.author && currUser._id.equals(review.author._id)) { %>
     <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
       <button class="btn btn-sm btn-dark">Delete</button>
     </form> 
+    <% } %>
    </div>
       <% } %>
       </div> 
+    <% } %>
    </div>
  </div>
  <!-- 📍 MAP SECTION (AFTER REVIEWS) -->
 <div class="row">
-  <div class="col-8 offset-2">
-    <div class="card map-card">
-      <div class="card-body">
-        <h5 class="card-title mb-3">Where you’ll be</h5>
-        <div id="map"></div>
-      </div>
-    </div>
+  <div class="col-8 offset-3 mb-3">
+    <h3>Where you'll be</h3>
+    <div id="map" style="height: 400px; width: 100%; border-radius: 10px; margin-top: 10px;"
+      data-location="<%= listing.location || '' %>"
+      data-country="<%= listing.country || '' %>"
+      data-title="<%= listing.title || '' %>"
+    ></div>
   </div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  
+  // Share Button Logic
+  const shareBtn = document.getElementById("shareBtn");
+  if(shareBtn){
+    shareBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
+    });
+  }
 
-  const listingLocation = "<%= listing.location || '' %>";
-  const listingCountry  = "<%= listing.country || '' %>";
-  const listingTitle    = "<%= listing.title || '' %>";
+  const mapElement = document.getElementById("map");
+  const listingLocation = mapElement.dataset.location;
+  const listingCountry  = mapElement.dataset.country;
+  const listingTitle    = mapElement.dataset.title;
 
   const locationName = `${listingLocation}, ${listingCountry}`;
 
@@ -107,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
       lng = Number(data[0].lon);
     }
 
-    const map = L.map("map").setView([lat, lng], 13);
+    const map = L.map(mapElement).setView([lat, lng], 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors",
