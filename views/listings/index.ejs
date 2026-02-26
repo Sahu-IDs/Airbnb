@@ -120,7 +120,7 @@
             class="card-img-top" alt="listing_img" style="height:20rem;">
           <div class="card-img-overlay">
             <button class="like-btn" data-id="<%= listing._id %>"
-              style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.6rem; color: <%= (typeof currUser !== 'undefined' && listing.likes && listing.likes.includes(currUser._id)) ? '#ff385c' : 'rgba(0,0,0,0.4)' %>; -webkit-text-stroke: 1.5px white; cursor: pointer; transition: transform 0.2s; z-index: 10;">
+              style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; font-size: 1.6rem; color: <%= (typeof currUser !== 'undefined' && listing.likes && listing.likes.includes(currUser._id)) ? '#ff385c' : 'rgba(0,0,0,0.7)' %>; -webkit-text-stroke: 2px white; cursor: pointer; transition: transform 0.2s; z-index: 10;">
               <i class="fa-solid fa-heart"></i>
             </button>
           </div>
@@ -179,7 +179,7 @@
             if (data.isLiked) {
               btn.style.color = "#ff385c"; // Airbnb red
             } else {
-              btn.style.color = "rgba(0,0,0,0.4)"; // Gray
+              btn.style.color = "rgba(0,0,0,0.7)"; // Darker Gray
             }
           }
         } catch (err) {
