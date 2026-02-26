@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: airbnb-service
+  namespace: airbnb
+  labels:
+    app: airbnb-app
+spec:
+  # ── NodePort exposes the app on every node's IP on port 30080 ────────────
+  # Use 'LoadBalancer' if you are on a cloud provider (AWS, GCP, Azure)
+  type: NodePort
+  selector:
+    app: airbnb-app            # Routes traffic to pods with this label
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80                 # Port the Service listens on (cluster-internal)
+      targetPort: 3000         # Port the container listens on
+      nodePort: 30080          # External port on each Node (30000–32767)

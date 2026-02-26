@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mazor Airbnb – Docker & Kubernetes | IBM Internship</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=Fira+Code:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --red: #FF385C;
+      --dark: #080814;
+      --card: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #e8e8f4;
+      --muted: #7878a0;
+      --blue: #4f8fff;
+      --green: #22d3a0;
+      --purple: #a78bfa;
+      --orange: #fb923c;
+      --yellow: #fbbf24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw
+    }
+
+    .deck {
+      width: 100%;
+      height: 100vh;
+      position: relative
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 56px 72px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(60px);
+      transition: opacity .45s ease, transform .45s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0)
+    }
+
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px)
+    }
+
+    .s1 {
+      background: radial-gradient(ellipse at 25% 40%, #3a0025 0%, var(--dark) 65%)
+    }
+
+    .s2 {
+      background: radial-gradient(ellipse at 75% 30%, #001830 0%, var(--dark) 65%)
+    }
+
+    .s3 {
+      background: radial-gradient(ellipse at 20% 70%, #0a2010 0%, var(--dark) 65%)
+    }
+
+    .s4 {
+      background: radial-gradient(ellipse at 80% 20%, #180a30 0%, var(--dark) 65%)
+    }
+
+    .s5 {
+      background: radial-gradient(ellipse at 50% 80%, #1a1400 0%, var(--dark) 65%)
+    }
+
+    .s6 {
+      background: radial-gradient(ellipse at 10% 10%, #001828 0%, var(--dark) 65%)
+    }
+
+    .s7 {
+      background: radial-gradient(ellipse at 90% 50%, #0a2810 0%, var(--dark) 65%)
+    }
+
+    .s8 {
+      background: radial-gradient(ellipse at 30% 30%, #281000 0%, var(--dark) 65%)
+    }
+
+    .s9 {
+      background: radial-gradient(ellipse at 70% 80%, #180028 0%, var(--dark) 65%)
+    }
+
+    .s10 {
+      background: radial-gradient(ellipse at 40% 20%, #280010 0%, var(--dark) 65%)
+    }
+
+    .s11 {
+      background: radial-gradient(ellipse at 60% 60%, #001428 0%, var(--dark) 65%)
+    }
+
+    /*Nav */
+    .nav {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 8px 22px;
+    }
+
+    .nav button {
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 6px 12px;
+      border-radius: 30px;
+      transition: background .2s
+    }
+
+    .nav button:hover {
+      background: rgba(255, 255, 255, 0.1)
+    }
+
+    .nav button:disabled {
+      opacity: .3;
+      cursor: default
+    }
+
+    #ctr {
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 52px;
+      text-align: center
+    }
+
+    .dots {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 100
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .18);
+      cursor: pointer;
+      transition: all .3s;
+      border: none
+    }
+
+    .dot.active {
+      background: var(--red);
+      transform: scale(1.5)
+    }
+
+    .badge {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 20px;
+      z-index: 100
+    }
+
+    .logo {
+      position: fixed;
+      top: 20px;
+      left: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 100
+    }
+
+    .logo span:first-child {
+      font-size: 20px
+    }
+
+    .logo span:last-child {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: 1.5px
+    }
+
+    /* Typography */
+    .label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 14px
+    }
+
+    h1 {
+      font-size: clamp(34px, 5vw, 64px);
+      font-weight: 900;
+      line-height: 1.1
+    }
+
+    h2 {
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 20px
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px
+    }
+
+    p,
+    li {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted)
+    }
+
+    li {
+      margin-left: 18px;
+      margin-bottom: 5px
+    }
+
+    .gt {
+      background: linear-gradient(135deg, #FF385C, #ff7eb3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .gb {
+      background: linear-gradient(135deg, #4f8fff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .gg {
+      background: linear-gradient(135deg, #22d3a0, #4f8fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .divider {
+      width: 70px;
+      height: 4px;
+      background: var(--red);
+      border-radius: 2px;
+      margin: 20px auto
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      backdrop-filter: blur(10px)
+    }
+
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      width: 100%
+    }
+
+    .g4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 14px;
+      width: 100%
+    }
+
+    .fw {
+      width: 100%;
+      max-width: 980px
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 16px;
+      margin: 3px
+    }
+
+    .tr {
+      background: rgba(255, 56, 92, .12);
+      color: #FF385C;
+      border: 1px solid rgba(255, 56, 92, .25)
+    }
+
+    .tb {
+      background: rgba(79, 143, 255, .12);
+      color: #4f8fff;
+      border: 1px solid rgba(79, 143, 255, .25)
+    }
+
+    .tg {
+      background: rgba(34, 211, 160, .12);
+      color: #22d3a0;
+      border: 1px solid rgba(34, 211, 160, .25)
+    }
+
+    .tp {
+      background: rgba(167, 139, 250, .12);
+      color: #a78bfa;
+      border: 1px solid rgba(167, 139, 250, .25)
+    }
+
+    .to {
+      background: rgba(251, 146, 60, .12);
+      color: #fb923c;
+      border: 1px solid rgba(251, 146, 60, .25)
+    }
+
+    .ty {
+      background: rgba(251, 191, 36, .12);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, .25)
+    }
+
+    /* Feature row */
+    .feat {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px
+    }
+
+    .fnum {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: rgba(255, 56, 92, .15);
+      color: var(--red);
+      font-weight: 800;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    /* Terminal box */
+    .term {
+      background: #0a0a12;
+      border: 1px solid rgba(34, 211, 160, .2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 2
+    }
+
+    .term .prompt {
+      color: #4f8fff
+    }
+
+    .term .cmd {
+      color: #e8e8f4
+    }
+
+    .term .out {
+      color: #22d3a0
+    }
+
+    .term .ok {
+      color: #22d3a0;
+      font-weight: 600
+    }
+
+    .term .warn {
+      color: #fb923c
+    }
+
+    /* Step row */
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px
+    }
+
+    .snum {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    /* CRUD table */
+    .crud-row {
+      display: grid;
+      grid-template-columns: 80px 120px 1fr 80px;
+      gap: 0;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .crud-row:last-child {
+      border-bottom: none
+    }
+
+    .method {
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 5px
+    }
+
+    .POST {
+      background: rgba(34, 211, 160, .15);
+      color: #22d3a0
+    }
+
+    .GET {
+      background: rgba(79, 143, 255, .15);
+      color: #4f8fff
+    }
+
+    .PUT {
+      background: rgba(251, 146, 60, .15);
+      color: #fb923c
+    }
+
+    .DELETE {
+      background: rgba(255, 56, 92, .15);
+      color: #FF385C
+    }
+
+    /* Stat bars */
+    .bar-wrap {
+      margin-bottom: 12px
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 12px;
+      font-weight: 600
+    }
+
+    .bar-track {
+      height: 7px;
+      background: rgba(255, 255, 255, .07);
+      border-radius: 4px;
+      overflow: hidden
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      animation: grow 1.5s ease forwards
+    }
+
+    @keyframes grow {
+      from {
+        width: 0
+      }
+    }
+
+    /* Arch */
+    .arch {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .abox {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+      min-width: 100px
+    }
+
+    .abox .ai {
+      font-size: 24px;
+      margin-bottom: 4px
+    }
+
+    .abox .al {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted)
+    }
+
+    .aarr {
+      font-size: 18px;
+      color: var(--red);
+      padding: 0 4px;
+      flex-shrink: 0
+    }
+
+    /* Particles */
+    .pts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden
+    }
+
+    .pt {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 56, 92, .12);
+      animation: fl linear infinite
+    }
+
+    @keyframes fl {
+      from {
+        transform: translateY(110vh) scale(0);
+        opacity: 0
+      }
+
+      10% {
+        opacity: .8
+      }
+
+      90% {
+        opacity: .8
+      }
+
+      to {
+        transform: translateY(-10vh) scale(1);
+        opacity: 0
+      }
+    }
+
+    /* ═══ PRINT STYLES ═══ */
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      body {
+        overflow: visible !important;
+        height: auto !important;
+        width: auto !important;
+        background: #080814 !important;
+      }
+
+      .pts,
+      .nav,
+      .dots,
+      .badge,
+      .logo {
+        display: none !important;
+      }
+
+      .deck {
+        width: auto !important;
+        height: auto !important;
+        position: static !important;
+      }
+
+      .slide {
+        position: relative !important;
+        inset: auto !important;
+        opacity: 1 !important;
+        pointer-events: all !important;
+        transform: none !important;
+        display: flex !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        padding: 40px 60px !important;
+      }
+
+      .slide:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+
+      /* Restore slide backgrounds */
+      .s1 {
+        background: radial-gradient(ellipse at 25% 40%, #3a0025 0%, #080814 65%) !important;
+      }
+
+      .s2 {
+        background: radial-gradient(ellipse at 75% 30%, #001830 0%, #080814 65%) !important;
+      }
+
+      .s3 {
+        background: radial-gradient(ellipse at 20% 70%, #0a2010 0%, #080814 65%) !important;
+      }
+
+      .s4 {
+        background: radial-gradient(ellipse at 80% 20%, #180a30 0%, #080814 65%) !important;
+      }
+
+      .s5 {
+        background: radial-gradient(ellipse at 50% 80%, #1a1400 0%, #080814 65%) !important;
+      }
+
+      .s6 {
+        background: radial-gradient(ellipse at 10% 10%, #001828 0%, #080814 65%) !important;
+      }
+
+      .s7 {
+        background: radial-gradient(ellipse at 90% 50%, #0a2810 0%, #080814 65%) !important;
+      }
+
+      .s8 {
+        background: radial-gradient(ellipse at 30% 30%, #281000 0%, #080814 65%) !important;
+      }
+
+      .s9 {
+        background: radial-gradient(ellipse at 70% 80%, #180028 0%, #080814 65%) !important;
+      }
+
+      .s10 {
+        background: radial-gradient(ellipse at 40% 20%, #280010 0%, #080814 65%) !important;
+      }
+
+      .s11 {
+        background: radial-gradient(ellipse at 60% 60%, #001428 0%, #080814 65%) !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="pts" id="pts"></div>
+  <div class="logo"><span>🏠</span><span>MAZOR AIRBNB</span></div>
+  <div class="badge" id="badge">1 / 11</div>
+  <div class="dots" id="dots"></div>
+
+  <div class="deck" id="deck">
+
+    <!-- ═══ S1: TITLE ═══ -->
+    <div class="slide s1 active" data-index="0">
+      <div style="text-align:center;max-width:860px">
+        <div class="label">IBM Cloud Internship · Major Project 2025–26</div>
+        <h1><span class="gt">Containerized CRUD</span><br />Web Application</h1>
+        <h1 style="font-size:clamp(20px,3vw,36px);font-weight:400;color:var(--muted);margin-top:8px">Deployment using
+          Docker &amp; Kubernetes</h1>
+        <div class="divider"></div>
+        <p style="font-size:16px;color:var(--text);max-width:580px;margin:0 auto">
+          A production-ready <strong>Airbnb Clone</strong> fully containerized with Docker and orchestrated using
+          Kubernetes — featuring auto-scaling, rolling updates &amp; zero-downtime deployment.
+        </p>
+        <div style="margin-top:32px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <span class="tag tr">Node.js</span><span class="tag tb">Express.js</span>
+          <span class="tag tg">MongoDB</span><span class="tag tp">Cloudinary</span>
+          <span class="tag to">🐳 Docker</span><span class="tag ty">☸️ Kubernetes</span>
+        </div>
+        <div style="margin-top:36px;color:var(--muted);font-size:13px">
+          <strong style="color:var(--text)">Sandeep</strong> &nbsp;|&nbsp; Computer Science &nbsp;|&nbsp; IBM Cloud
+          Internship Submission
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S2: PROBLEM STATEMENT ═══ -->
+    <div class="slide s2" data-index="1">
+      <div class="fw">
+        <div class="label">Slide 02 · Problem Statement</div>
+        <h2>Why This <span class="gt">Problem Exists?</span></h2>
+        <div class="g2">
+          <div class="card">
+            <div style="font-size:36px;margin-bottom:10px">😣</div>
+            <h3>No Unified Property Platform</h3>
+            <p>Landlords and tenants in smaller cities have no centralized digital platform to connect — relying on
+              physical notices or middlemen.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:36px;margin-bottom:10px">💥</div>
+            <h3>"Works on My Machine" Problem</h3>
+            <p>Applications run fine on the developer's laptop but crash in production due to different Node.js
+              versions, missing packages, or OS differences.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:36px;margin-bottom:10px">📉</div>
+            <h3>No Scalability</h3>
+            <p>Traditional single-server deployments crash under heavy user traffic. There is no automatic way to add
+              more servers when needed.</p>
+          </div>
+          <div class="card">
+            <div style="font-size:36px;margin-bottom:10px">🔒</div>
+            <h3>Insecure Config Management</h3>
+            <p>API keys and passwords are hardcoded in source code — leaked in Git repositories, causing security
+              breaches.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S3: OBJECTIVES ═══ -->
+    <div class="slide s3" data-index="2">
+      <div class="fw">
+        <div class="label">Slide 03 · Objectives</div>
+        <h2>Project <span class="gg">Objectives</span></h2>
+        <div class="feat">
+          <div class="fnum">01</div>
+          <div>
+            <h3>Build a Full-Stack CRUD Web App</h3>
+            <p>Develop a functional Airbnb clone with Create, Read, Update, Delete operations for property listings —
+              backed by MongoDB Atlas.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="fnum">02</div>
+          <div>
+            <h3>Containerize using Docker</h3>
+            <p>Package the entire Node.js application into a portable, lightweight Docker image using a multi-stage
+              Dockerfile so it runs identically on any machine.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="fnum">03</div>
+          <div>
+            <h3>Orchestrate with Kubernetes</h3>
+            <p>Deploy the container on a Kubernetes cluster with multiple replicas, auto-scaling (HPA), rolling updates,
+              and self-healing capabilities.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="fnum">04</div>
+          <div>
+            <h3>Implement Secure Secret Management</h3>
+            <p>Inject environment variables (API keys, DB URL) securely through Kubernetes Secrets — never hardcoded in
+              source code or Docker image.</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="fnum">05</div>
+          <div>
+            <h3>Achieve Zero-Downtime Deployment</h3>
+            <p>Enable seamless application updates using Kubernetes Rolling Update strategy — old pods remain active
+              until new ones are fully healthy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S4: CRUD OPERATIONS ═══ -->
+    <div class="slide s4" data-index="3">
+      <div class="fw">
+        <div class="label">Slide 04 · CRUD Operations</div>
+        <h2>CRUD <span class="gb">Operations</span> in the App</h2>
+        <div class="card" style="margin-bottom:14px">
+          <div class="crud-row" style="background:rgba(255,255,255,.04);border-radius:8px 8px 0 0">
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">METHOD</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">ROUTE</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">OPERATION</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">CRUD</div>
+          </div>
+          <div class="crud-row"><span class="method GET">GET</span><span
+              style="font-family:'Fira Code',monospace;font-size:11px;color:var(--blue)">/listings</span><span
+              style="font-size:13px;color:var(--text)">View all property listings</span><span class="tag tg"
+              style="font-size:11px">READ</span></div>
+          <div class="crud-row"><span class="method POST">POST</span><span
+              style="font-family:'Fira Code',monospace;font-size:11px;color:var(--green)">/listings</span><span
+              style="font-size:13px;color:var(--text)">Create new listing with images</span><span class="tag tb"
+              style="font-size:11px">CREATE</span></div>
+          <div class="crud-row"><span class="method GET">GET</span><span
+              style="font-family:'Fira Code',monospace;font-size:11px;color:var(--blue)">/listings/:id</span><span
+              style="font-size:13px;color:var(--text)">View single listing details</span><span class="tag tg"
+              style="font-size:11px">READ</span></div>
+          <div class="crud-row"><span class="method PUT">PUT</span><span
+              style="font-family:'Fira Code',monospace;font-size:11px;color:var(--orange)">/listings/:id</span><span
+              style="font-size:13px;color:var(--text)">Update listing (owner only)</span><span class="tag to"
+              style="font-size:11px">UPDATE</span></div>
+          <div class="crud-row"><span class="method DELETE">DEL</span><span
+              style="font-family:'Fira Code',monospace;font-size:11px;color:var(--red)">/listings/:id</span><span
+              style="font-size:13px;color:var(--text)">Delete listing (owner only)</span><span class="tag tr"
+              style="font-size:11px">DELETE</span></div>
+          <div class="crud-row"><span class="method POST">POST</span><span
+              style="font-family:'Fira Code',monospace;font-size:11px;color:var(--green)">/listings/:id/reviews</span><span
+              style="font-size:13px;color:var(--text)">Add review to listing</span><span class="tag tb"
+              style="font-size:11px">CREATE</span></div>
+          <div class="crud-row" style="border-bottom:none"><span class="method DELETE">DEL</span><span
+              style="font-family:'Fira Code',monospace;font-size:11px;color:var(--red)">/listings/:id/reviews/:rid</span><span
+              style="font-size:13px;color:var(--text)">Delete own review</span><span class="tag tr"
+              style="font-size:11px">DELETE</span></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <span class="tag tg">✅ RESTful Architecture</span>
+          <span class="tag tb">✅ Role-based Access Control</span>
+          <span class="tag tp">✅ Joi Input Validation</span>
+          <span class="tag to">✅ Multer Image Upload</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S5: ARCHITECTURE ═══ -->
+    <div class="slide s5" data-index="4">
+      <div class="fw">
+        <div class="label">Slide 05 · System Architecture</div>
+        <h2>System <span class="gb">Architecture</span></h2>
+        <div style="margin-bottom:6px;font-size:10px;color:var(--muted);letter-spacing:2px;text-align:center">USER /
+          BROWSER</div>
+        <div class="arch" style="margin-bottom:4px">
+          <div class="abox">
+            <div class="ai">🌍</div>
+            <div class="al">Browser</div>
+          </div>
+          <div class="aarr">→</div>
+          <div class="abox" style="border-color:rgba(255,56,92,.4)">
+            <div class="ai">☸️</div>
+            <div class="al">K8s Ingress<br />Port 30080</div>
+          </div>
+          <div class="aarr">→</div>
+          <div class="abox" style="border-color:rgba(79,143,255,.4)">
+            <div class="ai">⚖️</div>
+            <div class="al">K8s Service<br />Load Balancer</div>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:20px;color:var(--muted);margin:4px 0">↓</div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-align:center;margin-bottom:6px">KUBERNETES
+          PODS (2 Replicas — Auto-scales to 5)</div>
+        <div class="arch" style="margin-bottom:4px">
+          <div class="abox" style="border-color:rgba(34,211,160,.4)">
+            <div class="ai">🐳</div>
+            <div class="al">Pod 1<br />Node.js :3000</div>
+          </div>
+          <div style="width:12px"></div>
+          <div class="abox" style="border-color:rgba(34,211,160,.4)">
+            <div class="ai">🐳</div>
+            <div class="al">Pod 2<br />Node.js :3000</div>
+          </div>
+          <div style="width:12px"></div>
+          <div class="abox" style="border-color:rgba(167,139,250,.3);opacity:.5">
+            <div class="ai">🐳</div>
+            <div class="al">Pod 3–5<br />Auto-scaled</div>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:20px;color:var(--muted);margin:4px 0">↓</div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-align:center;margin-bottom:6px">EXTERNAL
+          CLOUD SERVICES</div>
+        <div class="arch">
+          <div class="abox" style="border-color:rgba(34,211,160,.4)">
+            <div class="ai">🍃</div>
+            <div class="al">MongoDB Atlas<br />Cloud DB</div>
+          </div>
+          <div style="width:12px"></div>
+          <div class="abox" style="border-color:rgba(251,146,60,.4)">
+            <div class="ai">☁️</div>
+            <div class="al">Cloudinary<br />Image CDN</div>
+          </div>
+          <div style="width:12px"></div>
+          <div class="abox" style="border-color:rgba(79,143,255,.4)">
+            <div class="ai">🔐</div>
+            <div class="al">K8s Secrets<br />Env Config</div>
+          </div>
+          <div style="width:12px"></div>
+          <div class="abox" style="border-color:rgba(251,191,36,.4)">
+            <div class="ai">🏠</div>
+            <div class="al">Docker Hub<br />Image Registry</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S6: TECH STACK ═══ -->
+    <div class="slide s6" data-index="5">
+      <div class="fw">
+        <div class="label">Slide 06 · Technology Stack</div>
+        <h2>Technology <span class="gt">Stack</span></h2>
+        <div class="g4">
+          <div class="card">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--green);margin-bottom:12px">⚙️
+              BACKEND</div>
+            <div style="font-size:22px;margin-bottom:6px">🟩</div>
+            <div style="font-size:14px;font-weight:700">Node.js 18</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">JS Runtime</div>
+            <div style="font-size:22px;margin-bottom:6px">🚂</div>
+            <div style="font-size:14px;font-weight:700">Express v5</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Web Framework</div>
+            <div style="font-size:22px;margin-bottom:6px">🔐</div>
+            <div style="font-size:14px;font-weight:700">Passport.js</div>
+            <div style="font-size:11px;color:var(--muted)">Authentication</div>
+          </div>
+          <div class="card">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--blue);margin-bottom:12px">🎨
+              FRONTEND</div>
+            <div style="font-size:22px;margin-bottom:6px">📄</div>
+            <div style="font-size:14px;font-weight:700">EJS Templates</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Server-side Rendering</div>
+            <div style="font-size:22px;margin-bottom:6px">🎨</div>
+            <div style="font-size:14px;font-weight:700">Bootstrap 5</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Responsive UI</div>
+            <div style="font-size:22px;margin-bottom:6px">✅</div>
+            <div style="font-size:14px;font-weight:700">Joi</div>
+            <div style="font-size:11px;color:var(--muted)">Input Validation</div>
+          </div>
+          <div class="card">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--purple);margin-bottom:12px">🗃️
+              DATABASE</div>
+            <div style="font-size:22px;margin-bottom:6px">🍃</div>
+            <div style="font-size:14px;font-weight:700">MongoDB Atlas</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Cloud NoSQL DB</div>
+            <div style="font-size:22px;margin-bottom:6px">🔗</div>
+            <div style="font-size:14px;font-weight:700">Mongoose</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">ODM for MongoDB</div>
+            <div style="font-size:22px;margin-bottom:6px">☁️</div>
+            <div style="font-size:14px;font-weight:700">Cloudinary</div>
+            <div style="font-size:11px;color:var(--muted)">Image Storage CDN</div>
+          </div>
+          <div class="card">
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--orange);margin-bottom:12px">🚀
+              DEVOPS</div>
+            <div style="font-size:22px;margin-bottom:6px">🐳</div>
+            <div style="font-size:14px;font-weight:700">Docker</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Containerization</div>
+            <div style="font-size:22px;margin-bottom:6px">☸️</div>
+            <div style="font-size:14px;font-weight:700">Kubernetes</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Orchestration</div>
+            <div style="font-size:22px;margin-bottom:6px">🏠</div>
+            <div style="font-size:14px;font-weight:700">Docker Hub</div>
+            <div style="font-size:11px;color:var(--muted)">Image Registry</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S7: DOCKER ═══ -->
+    <div class="slide s7" data-index="6">
+      <div class="fw">
+        <div class="label">Slide 07 · Docker Deployment</div>
+        <h2>🐳 Docker <span class="gg">Implementation</span></h2>
+        <div class="g2" style="align-items:start">
+          <div>
+            <div class="card" style="margin-bottom:14px">
+              <h3 style="margin-bottom:10px">Multi-Stage Dockerfile</h3>
+              <div class="term">
+                <div><span style="color:var(--purple)">FROM</span> <span class="cmd">node:18-alpine AS builder</span>
+                </div>
+                <div><span style="color:var(--purple)">WORKDIR</span> <span class="cmd">/app</span></div>
+                <div><span style="color:var(--purple)">COPY</span> <span class="cmd">package*.json ./</span></div>
+                <div><span style="color:var(--purple)">RUN</span> <span class="cmd">npm ci --omit=dev</span></div>
+                <div style="margin-top:6px"><span style="color:var(--purple)">FROM</span> <span
+                    class="cmd">node:18-alpine AS production</span></div>
+                <div><span style="color:var(--purple)">USER</span> <span class="cmd">appuser</span> <span
+                    style="color:var(--muted)"># Non-root</span></div>
+                <div><span style="color:var(--purple)">EXPOSE</span> <span class="cmd">3000</span></div>
+                <div><span style="color:var(--purple)">CMD</span> <span class="cmd">["node", "app.js"]</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <h3 style="margin-bottom:10px">Key Docker Features</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <span class="tag tg">✅ Alpine Base (Small Size)</span>
+                <span class="tag tb">✅ Multi-stage Build</span>
+                <span class="tag tp">✅ Non-root User</span>
+                <span class="tag to">✅ Health Check</span>
+                <span class="tag ty">✅ .dockerignore</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3 style="margin-bottom:10px">✅ Build, Push &amp; Deploy — Successfully Executed</h3>
+              <div class="term">
+                <div><span class="prompt">$</span> <span class="cmd">docker build -t sandeep13677/airbnb-clone:latest
+                    .</span></div>
+                <div class="out">[+] Building 14.7s (16/16) FINISHED ✔</div>
+                <div style="margin-top:6px"><span class="prompt">$</span> <span class="cmd">docker login --username
+                    sandeep13677</span></div>
+                <div class="ok">Login Succeeded ✔</div>
+                <div style="margin-top:6px"><span class="prompt">$</span> <span class="cmd">docker push
+                    sandeep13677/airbnb-clone:latest</span></div>
+                <div class="out">latest: digest: sha256:2bf75287... size: 856</div>
+                <div class="ok">Push to Docker Hub Succeeded ✔</div>
+                <div style="margin-top:6px"><span class="prompt">$</span> <span class="cmd">docker logs
+                    &lt;container&gt;</span></div>
+                <div class="ok">Connected to DB: Atlas Cloud ✔</div>
+                <div class="ok">Server is listening to port 3000 ✔</div>
+              </div>
+              <div
+                style="margin-top:12px;padding:10px;background:rgba(34,211,160,.08);border-radius:8px;border:1px solid rgba(34,211,160,.2)">
+                <div style="font-size:12px;color:var(--green);font-weight:700">🐳 Docker Hub:
+                  hub.docker.com/r/sandeep13677/airbnb-clone</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">Image Size: 56.9 MB &nbsp;|&nbsp; Tag:
+                  latest &nbsp;|&nbsp; Base: node:18-alpine</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S8: KUBERNETES ═══ -->
+    <div class="slide s8" data-index="7">
+      <div class="fw">
+        <div class="label">Slide 08 · Kubernetes Deployment</div>
+        <h2>☸️ Kubernetes <span class="gt">Deployment</span></h2>
+        <div class="g2" style="align-items:start">
+          <div>
+            <div class="step">
+              <div class="snum">1</div>
+              <div>
+                <div style="font-family:'Fira Code',monospace;font-size:11px;color:#22d3a0">kubectl apply -f
+                  k8s/namespace.yaml</div>
+                <div style="font-size:11px;color:var(--muted)">namespace/airbnb created</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="snum">2</div>
+              <div>
+                <div style="font-family:'Fira Code',monospace;font-size:11px;color:#22d3a0">kubectl apply -f
+                  k8s/secret.yaml</div>
+                <div style="font-size:11px;color:var(--muted)">secret/airbnb-secret created (Cloudinary + MongoDB)</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="snum">3</div>
+              <div>
+                <div style="font-family:'Fira Code',monospace;font-size:11px;color:#22d3a0">kubectl apply -f
+                  k8s/deployment.yaml</div>
+                <div style="font-size:11px;color:var(--muted)">deployment.apps/airbnb-app created — 2 replicas</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="snum">4</div>
+              <div>
+                <div style="font-family:'Fira Code',monospace;font-size:11px;color:#22d3a0">kubectl apply -f
+                  k8s/service.yaml</div>
+                <div style="font-size:11px;color:var(--muted)">service/airbnb-service NodePort :30080 created</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="snum">5</div>
+              <div>
+                <div style="font-family:'Fira Code',monospace;font-size:11px;color:#22d3a0">kubectl apply -f
+                  k8s/hpa.yaml</div>
+                <div style="font-size:11px;color:var(--muted)">HPA: auto-scale 2 → 5 pods on CPU &gt; 70%</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3 style="margin-bottom:10px">✅ Live kubectl Output</h3>
+              <div class="term">
+                <div><span class="prompt">$</span> <span class="cmd">kubectl get pods -n airbnb</span></div>
+                <div class="ok">
+                  NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;READY&nbsp;&nbsp;STATUS
+                </div>
+                <div class="ok">airbnb-app-7b9b-whqrd&nbsp;&nbsp;1/1&nbsp;&nbsp;&nbsp;&nbsp;Running ✔</div>
+                <div class="ok">airbnb-app-7b9b-wjvmp&nbsp;&nbsp;1/1&nbsp;&nbsp;&nbsp;&nbsp;Running ✔</div>
+                <div style="margin-top:8px"><span class="prompt">$</span> <span class="cmd">kubectl get svc -n
+                    airbnb</span></div>
+                <div class="out">airbnb-service&nbsp;NodePort&nbsp;80:30080/TCP</div>
+                <div style="margin-top:8px"><span class="prompt">$</span> <span class="cmd">kubectl get hpa -n
+                    airbnb</span></div>
+                <div class="out">airbnb-hpa&nbsp;min:2&nbsp;max:5&nbsp;TARGETS&lt;70%</div>
+              </div>
+              <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">
+                <span class="tag tg">✅ 2 Pods Running</span>
+                <span class="tag tb">✅ NodePort :30080</span>
+                <span class="tag tp">✅ HPA Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S9: K8s MANIFESTS ═══ -->
+    <div class="slide s9" data-index="8">
+      <div class="fw">
+        <div class="label">Slide 09 · Kubernetes Manifests</div>
+        <h2>K8s <span class="gb">Configuration Files</span></h2>
+        <div class="g3">
+          <div class="card">
+            <h3 style="color:var(--green);font-size:14px;margin-bottom:10px">📁 namespace.yaml</h3>
+            <div class="term" style="font-size:11px">
+              <div><span style="color:var(--purple)">kind:</span> <span class="cmd">Namespace</span></div>
+              <div><span style="color:var(--purple)">metadata:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:var(--purple)">name:</span> <span class="out">airbnb</span></div>
+            </div>
+            <p style="font-size:12px;margin-top:10px">Isolates all app resources in a dedicated namespace.</p>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--blue);font-size:14px;margin-bottom:10px">🔐 secret.yaml</h3>
+            <div class="term" style="font-size:11px">
+              <div><span style="color:var(--purple)">kind:</span> <span class="cmd">Secret</span></div>
+              <div><span style="color:var(--purple)">type:</span> <span class="cmd">Opaque</span></div>
+              <div><span style="color:var(--purple)">data:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:var(--purple)">ATLASDB_URL:</span> <span
+                  class="out">***base64***</span></div>
+              <div>&nbsp;&nbsp;<span style="color:var(--purple)">CLOUD_API_KEY:</span> <span
+                  class="out">***base64***</span></div>
+            </div>
+            <p style="font-size:12px;margin-top:10px">Secrets stored as Base64. Never in source code.</p>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--orange);font-size:14px;margin-bottom:10px">🚀 deployment.yaml</h3>
+            <div class="term" style="font-size:11px">
+              <div><span style="color:var(--purple)">replicas:</span> <span class="out">2</span></div>
+              <div><span style="color:var(--purple)">strategy:</span> <span class="cmd">RollingUpdate</span></div>
+              <div><span style="color:var(--purple)">image:</span> <span
+                  class="out">sandeep13677/airbnb-clone:latest</span></div>
+              <div><span style="color:var(--purple)">resources:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:var(--purple)">cpu:</span> <span class="out">300m</span> <span
+                  style="color:var(--purple)">mem:</span> <span class="out">256Mi</span></div>
+            </div>
+            <p style="font-size:12px;margin-top:10px">2 pods, resource limits, liveness &amp; readiness probes.</p>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--red);font-size:14px;margin-bottom:10px">🌐 service.yaml</h3>
+            <div class="term" style="font-size:11px">
+              <div><span style="color:var(--purple)">kind:</span> <span class="cmd">Service</span></div>
+              <div><span style="color:var(--purple)">type:</span> <span class="cmd">NodePort</span></div>
+              <div><span style="color:var(--purple)">port:</span> <span class="out">80</span></div>
+              <div><span style="color:var(--purple)">targetPort:</span> <span class="out">3000</span></div>
+              <div><span style="color:var(--purple)">nodePort:</span> <span class="out">30080</span></div>
+            </div>
+            <p style="font-size:12px;margin-top:10px">Exposes app on port 30080 on the cluster node.</p>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--purple);font-size:14px;margin-bottom:10px">📈 hpa.yaml</h3>
+            <div class="term" style="font-size:11px">
+              <div><span style="color:var(--purple)">kind:</span> <span class="cmd">HorizontalPodAutoscaler</span></div>
+              <div><span style="color:var(--purple)">minReplicas:</span> <span class="out">2</span></div>
+              <div><span style="color:var(--purple)">maxReplicas:</span> <span class="out">5</span></div>
+              <div><span style="color:var(--purple)">cpu target:</span> <span class="out">70%</span></div>
+            </div>
+            <p style="font-size:12px;margin-top:10px">Auto-scales 2→5 pods when CPU exceeds 70%.</p>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--yellow);font-size:14px;margin-bottom:10px">🌍 ingress.yaml</h3>
+            <div class="term" style="font-size:11px">
+              <div><span style="color:var(--purple)">kind:</span> <span class="cmd">Ingress</span></div>
+              <div><span style="color:var(--purple)">host:</span> <span class="out">airbnb.domain.com</span></div>
+              <div><span style="color:var(--purple)">path:</span> <span class="cmd">/</span></div>
+              <div><span style="color:var(--purple)">backend:</span> <span class="cmd">airbnb-service:80</span></div>
+            </div>
+            <p style="font-size:12px;margin-top:10px">Routes domain traffic to the service (optional).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S10: CHALLENGES ═══ -->
+    <div class="slide s10" data-index="9">
+      <div class="fw">
+        <div class="label">Slide 10 · Challenges &amp; Solutions</div>
+        <h2>Challenges &amp; <span class="gb">Solutions</span></h2>
+        <div class="g2">
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ CHALLENGE 1</div>
+            <h3 style="font-size:15px;margin-bottom:6px">MongoDB Atlas Connection Refused</h3>
+            <p style="font-size:13px">Docker containers had different outbound IPs — Atlas blocked them by default.</p>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">✅ SOLUTION</div>
+              <p style="font-size:13px">Added <code
+                  style="color:var(--blue);font-family:'Fira Code',monospace">0.0.0.0/0</code> to MongoDB Atlas Network
+                Access. DB URL passed via K8s Secret.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ CHALLENGE 2</div>
+            <h3 style="font-size:15px;margin-bottom:6px">Secrets Leaking in Source Code</h3>
+            <p style="font-size:13px">API keys were in <code
+                style="font-family:'Fira Code',monospace;color:var(--orange)">.env</code> file — dangerous to push to
+              Git or include in Docker image.</p>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">✅ SOLUTION</div>
+              <p style="font-size:13px">Used Kubernetes <code
+                  style="color:var(--blue);font-family:'Fira Code',monospace">Secret</code> objects with Base64
+                encoding. <code style="font-family:'Fira Code',monospace;color:var(--orange)">.env</code> deleted from
+                image via <code style="font-family:'Fira Code',monospace;color:var(--orange)">.dockerignore</code>.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ CHALLENGE 3</div>
+            <h3 style="font-size:15px;margin-bottom:6px">Health Probe Failing (404 on /)</h3>
+            <p style="font-size:13px">Kubernetes liveness &amp; readiness probes were hitting <code
+                style="font-family:'Fira Code',monospace;color:var(--orange)">/</code> which returned 404, causing pods
+              to restart repeatedly.</p>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">✅ SOLUTION</div>
+              <p style="font-size:13px">Changed probe path to <code
+                  style="color:var(--blue);font-family:'Fira Code',monospace">/listings</code> in deployment.yaml. Added
+                root redirect <code style="font-family:'Fira Code',monospace;color:var(--green)">/ → /listings</code> in
+                app.js.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ CHALLENGE 4</div>
+            <h3 style="font-size:15px;margin-bottom:6px">App Downtime During Updates</h3>
+            <p style="font-size:13px">Restarting a single-server app causes 100% downtime for users during deployments.
+            </p>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">✅ SOLUTION</div>
+              <p style="font-size:13px">Kubernetes <strong>Rolling Update</strong> strategy: new pods start before old
+                ones stop. <strong>Zero downtime</strong> guaranteed.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ S11: CONCLUSION ═══ -->
+    <div class="slide s11" data-index="10">
+      <div class="fw">
+        <div class="label">Slide 11 · Conclusion</div>
+        <h2>Conclusion &amp; <span class="gt">Future Scope</span></h2>
+        <div class="g2">
+          <div>
+            <div class="card" style="margin-bottom:14px">
+              <h3 style="margin-bottom:14px">📊 Deployment Achievements</h3>
+              <div class="bar-wrap">
+                <div class="bar-label"><span>Docker Image Build</span><span style="color:var(--green)">100%</span></div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#22d3a0,#4f8fff)"></div>
+                </div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-label"><span>Kubernetes Deployment</span><span style="color:var(--blue)">100%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#4f8fff,#a78bfa)"></div>
+                </div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-label"><span>CRUD Operations</span><span style="color:var(--purple)">100%</span></div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#a78bfa,#FF385C)"></div>
+                </div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-label"><span>Auto Scaling (HPA)</span><span style="color:var(--orange)">100%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#fb923c,#fbbf24)"></div>
+                </div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-label"><span>Security (Secrets)</span><span style="color:var(--red)">95%</span></div>
+                <div class="bar-track">
+                  <div class="bar-fill" style="width:95%;background:linear-gradient(90deg,#FF385C,#ff7eb3)"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3 style="margin-bottom:10px">✅ Project Deliverables</h3>
+              <p style="font-size:13px">✔ Dockerfile &nbsp;✔ .dockerignore<br />✔ namespace.yaml &nbsp;✔
+                secret.yaml<br />✔ deployment.yaml &nbsp;✔ service.yaml<br />✔ hpa.yaml &nbsp;✔ ingress.yaml<br />✔
+                DEPLOYMENT.md (Full guide)</p>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:14px">
+              <h3 style="margin-bottom:12px">🔮 Future Scope</h3>
+              <div class="feat" style="margin-bottom:10px">
+                <div class="fnum" style="font-size:15px">💳</div>
+                <div>
+                  <h3 style="font-size:13px">Payment Gateway</h3>
+                  <p style="font-size:12px">Razorpay/Stripe for booking payments</p>
+                </div>
+              </div>
+              <div class="feat" style="margin-bottom:10px">
+                <div class="fnum" style="font-size:15px">☁️</div>
+                <div>
+                  <h3 style="font-size:13px">IBM Cloud IKS Deployment</h3>
+                  <p style="font-size:12px">Deploy on IBM Kubernetes Service with Container Registry</p>
+                </div>
+              </div>
+              <div class="feat" style="margin-bottom:10px">
+                <div class="fnum" style="font-size:15px">📱</div>
+                <div>
+                  <h3 style="font-size:13px">CI/CD Pipeline</h3>
+                  <p style="font-size:12px">GitHub Actions → auto build → auto deploy on K8s</p>
+                </div>
+              </div>
+              <div class="feat">
+                <div class="fnum" style="font-size:15px">🤖</div>
+                <div>
+                  <h3 style="font-size:13px">AI Recommendations</h3>
+                  <p style="font-size:12px">Smart listing suggestions using ML</p>
+                </div>
+              </div>
+            </div>
+            <div
+              style="background:rgba(255,56,92,.08);border:1px solid rgba(255,56,92,.2);border-radius:12px;padding:16px;text-align:center">
+              <p style="font-size:14px;color:var(--text);line-height:1.7">
+                This project successfully demonstrates<br />
+                <strong style="color:var(--red)">Containerized CRUD Deployment</strong><br />
+                using <strong style="color:var(--blue)">Docker</strong> &amp; <strong
+                  style="color:var(--yellow)">Kubernetes</strong> —<br />
+                production-ready with auto-scaling &amp; zero-downtime. 🚀
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /deck -->
+
+  <div class="nav">
+    <button id="bp" onclick="go(-1)">←</button>
+    <span id="ctr">1 / 11</span>
+    <button id="bn" onclick="go(1)">→</button>
+  </div>
+
+  <script>
+    const TOTAL = 11; let cur = 0;
+    const dotsEl = document.getElementById('dots');
+    for (let i = 0; i < TOTAL; i++) { const d = document.createElement('button'); d.className = 'dot' + (i === 0 ? ' active' : ''); d.onclick = () => jump(i); dotsEl.appendChild(d) }
+    function jump(n) {
+      if (n < 0 || n >= TOTAL) return;
+      const sl = [...document.querySelectorAll('.slide')];
+      sl[cur].classList.remove('active'); sl[cur].classList.add('exit');
+      setTimeout(() => sl[cur].classList.remove('exit'), 450);
+      cur = n; sl[cur].classList.add('active');
+      [...dotsEl.children].forEach((d, i) => d.classList.toggle('active', i === cur));
+      document.getElementById('ctr').textContent = `${cur + 1} / ${TOTAL}`;
+      document.getElementById('badge').textContent = `${cur + 1} / ${TOTAL}`;
+      document.getElementById('bp').disabled = cur === 0;
+      document.getElementById('bn').disabled = cur === TOTAL - 1;
+    }
+    function go(d) { jump(cur + d) }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(-1);
+    });
+    document.getElementById('bp').disabled = true;
+    // particles
+    const p = document.getElementById('pts');
+    for (let i = 0; i < 14; i++) { const el = document.createElement('div'); const s = Math.random() * 6 + 3; el.className = 'pt'; el.style.cssText = `width:${s}px;height:${s}px;left:${Math.random() * 100}%;animation-duration:${Math.random() * 18 + 12}s;animation-delay:${Math.random() * 18}s;`; p.appendChild(el) }
+  </script>
+</body>
+
+</html>

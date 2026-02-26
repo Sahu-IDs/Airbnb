@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbnb-app
+  namespace: airbnb
+  labels:
+    app: airbnb-app
+    version: "1.0.0"
+spec:
+  replicas: 2                          # Run 2 pods for high availability
+  selector:
+    matchLabels:
+      app: airbnb-app
+  strategy:
+    type: RollingUpdate                # Zero-downtime deployments
+    rollingUpdate:
+      maxSurge: 1                      # Allow 1 extra pod during update
+      maxUnavailable: 0                # Never go below desired replica count
+  template:
+    metadata:
+      labels:
+        app: airbnb-app
+    spec:
+      # ── Security Context ───────────────────────────────────────────────────
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: airbnb-app
+          # ── Image ─────────────────────────────────────────────────────────
+          # Docker Hub image
+          image: sandeep13677/airbnb-clone:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 3000
+              name: http
+
+          # ── Environment Variables from Secret ──────────────────────────────
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: airbnb-secret
+                  key: CLOUD_NAME
+            - name: CLOUD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: airbnb-secret
+                  key: CLOUD_API_KEY
+            - name: CLOUD_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: airbnb-secret
+                  key: CLOUD_API_SECRET
+            - name: ATLASDB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: airbnb-secret
+                  key: ATLASDB_URL
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: airbnb-secret
+                  key: SECRET
+
+          # ── Resource Limits ────────────────────────────────────────────────
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+
+          # ── Liveness Probe (restart pod if unresponsive) ───────────────────
+          livenessProbe:
+            httpGet:
+              path: /listings
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+
+          # ── Readiness Probe (only send traffic when ready) ─────────────────
+          readinessProbe:
+            httpGet:
+              path: /listings
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+      # ── Restart Policy ─────────────────────────────────────────────────────
+      restartPolicy: Always

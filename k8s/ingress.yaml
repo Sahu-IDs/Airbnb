@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: airbnb-ingress
+  namespace: airbnb
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"   # Set "true" when using HTTPS
+spec:
+  # Uncomment below for TLS/HTTPS
+  # tls:
+  #   - hosts:
+  #       - airbnb.yourdomain.com
+  #     secretName: airbnb-tls-secret
+  rules:
+    - host: airbnb.yourdomain.com    # Replace with your actual domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: airbnb-service
+                port:
+                  number: 80
