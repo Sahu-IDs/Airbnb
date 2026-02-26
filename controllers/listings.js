@@ -48,7 +48,7 @@ module.exports.index = async (req, res) => {
         { category: { $regex: search, $options: "i" } }
       ],
     });
-    if(allListings.length === 0) {
+    if (allListings.length === 0) {
       req.flash("error", "No listings found for that search!");
     }
   } else {
@@ -167,4 +167,33 @@ module.exports.filterByCategory = async (req, res) => {
   }
 
   res.render("listings/index", { allListings });
+};
+
+// TOGGLE LIKE
+module.exports.toggleLike = async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+
+  if (!listing) {
+    return res.status(404).json({ error: "Listing not found" });
+  }
+
+  const userId = req.user._id;
+  const isLiked = listing.likes.includes(userId);
+
+  if (isLiked) {
+    // Unlike
+    listing.likes.pull(userId);
+  } else {
+    // Like
+    listing.likes.push(userId);
+  }
+
+  await listing.save();
+
+  res.json({
+    success: true,
+    isLiked: !isLiked,
+    likeCount: listing.likes.length
+  });
 };

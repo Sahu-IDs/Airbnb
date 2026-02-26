@@ -23,17 +23,17 @@ router.get("/new", isLoggedIn, listingController.renderNewForm);
 
 /*CATEGORY FILTER  ✅ NEW - Must be before /:id */
 router.get(
-  "/category/:type",
-  wrapAsync(listingController.filterByCategory)
+    "/category/:type",
+    wrapAsync(listingController.filterByCategory)
 );
 
 // SEARCH ROUTE
 router.get("/search", wrapAsync(async (req, res) => {
     let { q } = req.query;
-    if(!q){
+    if (!q) {
         return res.redirect("/listings");
     }
-    const allListings = await Listing.find({ 
+    const allListings = await Listing.find({
         $or: [
             { title: { $regex: q, $options: "i" } },
             { location: { $regex: q, $options: "i" } },
@@ -42,6 +42,13 @@ router.get("/search", wrapAsync(async (req, res) => {
     });
     res.render("listings/index.ejs", { allListings });
 }));
+
+// LIKE ROUTE
+router.post(
+    "/:id/like",
+    isLoggedIn,
+    wrapAsync(listingController.toggleLike)
+);
 
 router.route("/:id")
     .get(wrapAsync(listingController.showListing))
