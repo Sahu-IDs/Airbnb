@@ -995,58 +995,63 @@
         <h2>🐳 Docker <span class="gg">Implementation</span></h2>
         <div class="g2" style="align-items:start">
           <div>
-            <div class="card" style="margin-bottom:14px">
-              <h3 style="margin-bottom:10px">Multi-Stage Dockerfile</h3>
-              <div class="term">
-                <div><span style="color:var(--purple)">FROM</span> <span class="cmd">node:18-alpine AS builder</span>
-                </div>
-                <div><span style="color:var(--purple)">WORKDIR</span> <span class="cmd">/app</span></div>
-                <div><span style="color:var(--purple)">COPY</span> <span class="cmd">package*.json ./</span></div>
-                <div><span style="color:var(--purple)">RUN</span> <span class="cmd">npm ci --omit=dev</span></div>
-                <div style="margin-top:6px"><span style="color:var(--purple)">FROM</span> <span
-                    class="cmd">node:18-alpine AS production</span></div>
-                <div><span style="color:var(--purple)">USER</span> <span class="cmd">appuser</span> <span
-                    style="color:var(--muted)"># Non-root</span></div>
-                <div><span style="color:var(--purple)">EXPOSE</span> <span class="cmd">3000</span></div>
-                <div><span style="color:var(--purple)">CMD</span> <span class="cmd">["node", "app.js"]</span></div>
+            <div class="card" style="margin-bottom:14px; padding: 20px;">
+              <h3 style="margin-bottom:16px;">Docker Deployment Flow</h3>
+              <div class="step" style="padding:10px 14px; margin-bottom: 8px;">
+                <span class="fnum"
+                  style="background:var(--red);color:white;width:24px;height:24px;font-size:11px;">1</span>
+                <code
+                  style="font-family:'Fira Code';font-size:11px;color:var(--text)">docker login --username sandeep13677</code>
               </div>
-            </div>
-            <div class="card">
-              <h3 style="margin-bottom:10px">Key Docker Features</h3>
-              <div style="display:flex;flex-wrap:wrap;gap:6px">
-                <span class="tag tg">✅ Alpine Base (Small Size)</span>
-                <span class="tag tb">✅ Multi-stage Build</span>
-                <span class="tag tp">✅ Non-root User</span>
-                <span class="tag to">✅ Health Check</span>
-                <span class="tag ty">✅ .dockerignore</span>
+              <div class="step" style="padding:10px 14px; margin-bottom: 8px;">
+                <span class="fnum"
+                  style="background:var(--orange);color:white;width:24px;height:24px;font-size:11px;">2</span>
+                <code
+                  style="font-family:'Fira Code';font-size:11px;color:var(--text)">docker build -t airbnb-clone .</code>
+              </div>
+              <div class="step" style="padding:10px 14px; margin-bottom: 8px;">
+                <span class="fnum"
+                  style="background:var(--yellow);color:black;width:24px;height:24px;font-size:11px;">3</span>
+                <code
+                  style="font-family:'Fira Code';font-size:11px;color:var(--text)">docker tag airbnb-clone sandeep13677/airbnb-clone:latest</code>
+              </div>
+              <div class="step" style="padding:10px 14px; margin-bottom: 0;">
+                <span class="fnum"
+                  style="background:var(--green);color:white;width:24px;height:24px;font-size:11px;">4</span>
+                <code
+                  style="font-family:'Fira Code';font-size:11px;color:var(--text)">docker push sandeep13677/airbnb-clone:latest</code>
               </div>
             </div>
           </div>
           <div>
-            <div class="card">
-              <h3 style="margin-bottom:10px">✅ Build, Push &amp; Deploy — Successfully Executed</h3>
-              <div class="term">
-                <div><span class="prompt">$</span> <span class="cmd">docker build -t sandeep13677/airbnb-clone:latest
-                    .</span></div>
-                <div class="out">[+] Building 14.7s (16/16) FINISHED ✔</div>
-                <div style="margin-top:6px"><span class="prompt">$</span> <span class="cmd">docker login --username
-                    sandeep13677</span></div>
-                <div class="ok">Login Succeeded ✔</div>
-                <div style="margin-top:6px"><span class="prompt">$</span> <span class="cmd">docker push
-                    sandeep13677/airbnb-clone:latest</span></div>
-                <div class="out">latest: digest: sha256:2bf75287... size: 856</div>
-                <div class="ok">Push to Docker Hub Succeeded ✔</div>
-                <div style="margin-top:6px"><span class="prompt">$</span> <span class="cmd">docker logs
-                    &lt;container&gt;</span></div>
-                <div class="ok">Connected to DB: Atlas Cloud ✔</div>
-                <div class="ok">Server is listening to port 3000 ✔</div>
+            <div class="card" style="background: rgba(34, 211, 160, 0.05); border: 1px solid rgba(34, 211, 160, 0.2);">
+              <h3 style="margin-bottom:20px; color:var(--text); font-size: 18px;">✅ Airbnb Clone Credentials</h3>
+              <div style="margin-bottom: 16px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted)">➤ DOCKER IMAGE ID /
+                  TAG:</div>
+                <div
+                  style="font-family:'Fira Code';font-size:13px;color:var(--green);margin-top:4px;word-break:break-all;">
+                  sandeep13677/airbnb-clone:latest</div>
               </div>
-              <div
-                style="margin-top:12px;padding:10px;background:rgba(34,211,160,.08);border-radius:8px;border:1px solid rgba(34,211,160,.2)">
-                <div style="font-size:12px;color:var(--green);font-weight:700">🐳 Docker Hub:
-                  hub.docker.com/r/sandeep13677/airbnb-clone</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:4px">Image Size: 56.9 MB &nbsp;|&nbsp; Tag:
-                  latest &nbsp;|&nbsp; Base: node:18-alpine</div>
+              <div style="margin-bottom: 16px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted)">➤ KUBERNETES PODS
+                  (CONTAINERS):</div>
+                <div
+                  style="font-family:'Fira Code';font-size:13px;color:var(--text);margin-top:4px;word-break:break-all;">
+                  airbnb-app-64b98cc79d-dncll<br>airbnb-app-64b98cc79d-vhffj</div>
+              </div>
+              <div style="margin-bottom: 16px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted)">➤ GITHUB LINK:</div>
+                <div
+                  style="font-family:'Fira Code';font-size:13px;color:var(--blue);margin-top:4px;word-break:break-all;">
+                  https://github.com/Sahu-IDs/Airbnb</div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted)">➤ LIVE PROJECT LINK:
+                </div>
+                <div
+                  style="font-family:'Fira Code';font-size:13px;color:var(--orange);margin-top:4px;word-break:break-all;">
+                  https://airbnb-project-2cef.onrender.com</div>
               </div>
             </div>
           </div>
